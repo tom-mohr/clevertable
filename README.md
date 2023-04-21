@@ -66,6 +66,14 @@ nc = NumericalConverter(ignore_unknown=True)
 However, it is safer to explicitly set the conversion
 method to `"ignore"` for all columns you want to ignore.
 
+## CLI
+
+`pip install clevertable` also makes the command `clevertable` available
+in the command line.
+It allows to quickly convert tables without even creating a Python script.
+Execute `clevertable -h` to see the possible arguments that can be passed
+to the tool.
+
 ## Supported Conversion Methods
 
 ### ignore
