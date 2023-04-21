@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clevertable"
+version = "1.0.0"
+description = "Low effort conversion of tabular data into numerical values."
+readme = "README.md"
+authors = [{ name = "Tom Mohr" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["parser", "converter", "numerical"]
+dependencies = [
+    "numpy",
+    "pandas",
+]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/tom-mohr/clevertable"
+
+[project.scripts]
+clevertable = "clevertable.__main__:main"
+
+[tool.bumpver]
+current_version = "1.0.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"']
+"src/clevertable/__init__.py" = ["{version}"]
