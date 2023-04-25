@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clevertable"
-version = "1.0.0"
+version = "1.0.1"
 description = "Low effort conversion of tabular data into numerical values."
 readme = "README.md"
 authors = [{ name = "Tom Mohr" }]
@@ -36,5 +36,5 @@ tag = true
 push = false
 
 [tool.bumpver.file_patterns]
-"pyproject.toml" = ['current_version = "{version}"']
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
 "src/clevertable/__init__.py" = ["{version}"]
