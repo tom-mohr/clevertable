@@ -220,6 +220,7 @@ class NumericalConverter:
                 if "values" not in args:
                     # infer values from data
                     possible_values = set(split_col.explode().unique())
+                    possible_values = possible_values.difference({""})
                     args["values"] = possible_values
                 for value in args["values"]:
                     new_df[f"{col_name}={value}"] = split_col.apply(lambda x: value in x)
