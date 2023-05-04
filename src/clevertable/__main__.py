@@ -1,41 +1,37 @@
-from .numerical_converter import NumericalConverter
+from .ConversionProfile import ConversionProfile
 
 
-def main(source_file: str, output_file: str, profile: dict, ignore_unknown: bool):
-    nc = NumericalConverter(ignore_unknown=ignore_unknown)
-    nc.update_profile(profile)
-
-    df = nc(source_file)
+def run(source_file: str, output_file: str, ignore_columns: list[str]):
+    ignore_profile = {col_name: None for col_name in ignore_columns}
+    profile = ConversionProfile(ignore_profile)
+    df = profile.fit_transform(source_file)
 
     # choose the output format based on the file extension
     if output_file.endswith(".xlsx"):
         df.to_excel(output_file)
     elif output_file.endswith(".csv"):
         df.to_csv(output_file)
+    elif output_file.endswith(".tsv"):
+        df.to_csv(output_file, sep="\t")
     else:
         raise ValueError(f"Unexpected file extension: {output_file}")
 
 
-if __name__ == "__main__":
+def main():
     import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("src", type=str, help="Path to source file")
-    parser.add_argument("out", type=str, help="Path to output file")
-    parser.add_argument("--profile", type=str, default=None, help="Path to JSON profile file")
-    parser.add_argument("--ignore-unknown", action="store_true", help="Ignore unknown columns")
+    parser = argparse.ArgumentParser(
+        description=f"Consistent and intelligent conversion of tabular data into numerical values.")
+    parser.add_argument("src", type=str, help="Path to input file.")
+    parser.add_argument("out", type=str, help="Path to output file.")
+    parser.add_argument("-i", "--ignore", type=str, nargs="+", default=[], help="Column names to ignore.")
 
     args = parser.parse_args()
 
-    if args.profile is not None:
-        # load profile from file
-        import json
-        with open(args.profile, "r") as f:
-            profile = json.load(f)
-    else:
-        profile = {}
+    run(source_file=args.src,
+        output_file=args.out,
+        ignore_columns=args.ignore)
 
-    main(source_file=args.src,
-         output_file=args.out,
-         profile=profile,
-         ignore_unknown=args.ignore_unknown)
+
+if __name__ == "__main__":
+    main()

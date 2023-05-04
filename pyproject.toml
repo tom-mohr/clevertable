@@ -18,8 +18,13 @@ keywords = ["parser", "converter", "numerical"]
 dependencies = [
     "numpy",
     "pandas",
+    "openpyxl",  # needed for xlsx support
+    "scipy",
 ]
 requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = ["bumpver", "twine", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/tom-mohr/clevertable"
@@ -38,3 +43,8 @@ push = false
 [tool.bumpver.file_patterns]
 "pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
 "src/clevertable/__init__.py" = ["{version}"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests/*"]
+pythonpath = ["src"]
