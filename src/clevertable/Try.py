@@ -65,3 +65,12 @@ class Try(Converter):
                 if not isinstance(e, self.exceptions):
                     raise e
         return row
+
+    def __getitem__(self, item):
+        return self.converters[item]
+
+    def __setitem__(self, key, value):
+        self.converters[key] = _parse_converter(value)
+
+    def __repr__(self):
+        return repr(tuple(self.converters))
