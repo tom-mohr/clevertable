@@ -4,7 +4,9 @@ from abc import ABC, abstractmethod
 
 
 class Converter(ABC):
-    """A converter is used to convert a single column of data into multiple columns of data."""
+    """
+    Base class for all converters.
+    A converter is used to convert a single column of data into one or multiple columns of data."""
 
     def fit(self, rows: list[list]):
         """The converter is presented representative sample data.
@@ -75,3 +77,6 @@ class Converter(ABC):
         even if fitted with different data.
         """
         return repr(self)
+
+    def __add__(self, other):
+        return [self, other]

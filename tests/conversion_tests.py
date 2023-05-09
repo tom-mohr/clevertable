@@ -166,3 +166,14 @@ def test_multi_column():
 
 def test_duplicated_column_names():
     pass  # todo
+
+
+def test_add_to_pipeline():
+    profile = ConversionProfile()
+    profile["Test"] = Float()
+    profile["Test"] += Binary()
+    profile["Test"] += OneHot()
+    assert type(profile["Test"]) == Pipeline
+    assert type(profile["Test"][0]) == Float
+    assert type(profile["Test"][1]) == Binary
+    assert type(profile["Test"][2]) == OneHot
