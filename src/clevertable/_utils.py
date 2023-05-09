@@ -9,21 +9,19 @@ def _parse_converter(value: any) -> Converter:
     # dynamic imports in order to break circular dependency
     from .Const import Const
     from .Ignore import Ignore
-    from .Label import Label
     from .Map import Map
     from .Function import Function
     from .Pipeline import Pipeline
+    from .Try import Try
 
     if isinstance(value, Converter):
         return value
     if value is None:
         return Ignore()
-    if isinstance(value, str):
-        return Label(value)
     if isinstance(value, dict):
         return Map(value)
     if isinstance(value, tuple):
-        return Label(*value)
+        return Try(*value)
     if isinstance(value, list):
         return Pipeline(*value)
     if callable(value):
