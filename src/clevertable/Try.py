@@ -34,7 +34,6 @@ class Try(Converter):
             for row in rows:
                 try:
                     conv.transform(row)
-                    return
                 except Exception as e:
                     if not isinstance(e, self.exceptions):
                         raise e
