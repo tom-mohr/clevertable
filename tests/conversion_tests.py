@@ -35,14 +35,32 @@ def general_test():
 def test_parsing():
     profile = ConversionProfile()
 
-    profile["ignore"] = None
-    assert type(profile["ignore"]) is Ignore
+    profile["Test Ignore"] = None
+    assert type(profile["Test Ignore"]) is Ignore
 
-    profile["pipeline"] = [None, None]
-    assert type(profile["pipeline"]) is Pipeline
+    profile["Test Map"] = {"Hello": 1, "Bye": 2}
+    assert type(profile["Test Map"]) is Map
 
-    profile["function"] = lambda s: s[:3]
-    assert type(profile["function"]) is Function
+    profile["Test Try"] = Float(), 1
+    assert type(profile["Test Try"]) is Try
+    assert type(profile["Test Try"][0]) is Float
+    assert type(profile["Test Try"][1]) is Const
+
+    profile["Test Pipeline"] = [Strip(), Float(), 1]
+    assert type(profile["Test Pipeline"]) is Pipeline
+    assert type(profile["Test Pipeline"][0]) is Strip
+    assert type(profile["Test Pipeline"][1]) is Float
+    assert type(profile["Test Pipeline"][2]) is Const
+
+    profile["Test Function"] = str.lower
+    assert type(profile["Test Function"]) is Function
+    profile["Test Function"] = lambda s: s.lower()
+    assert type(profile["Test Function"]) is Function
+
+    profile["Test Const"] = 1
+    assert type(profile["Test Const"]) is Const
+    profile["Test Const"] = "Constant"
+    assert type(profile["Test Const"]) is Const
 
 
 def test_try():
@@ -54,6 +72,7 @@ def test_try():
             {"male": 0, "female": 1, "non-binary": 2},
         ),
     }, pre_processing=lambda s: s.strip().lower())
+    profile["numbers"] = Float(), 1000
     df = profile.fit_transform(pd.DataFrame({
         "gender": [
             "diverse",
@@ -69,16 +88,24 @@ def test_try():
             "non-binary",
             "MALE",
         ],
+        "numbers": [
+            "five",
+            "14",
+            "42",
+            "acb",
+            "429",
+        ],
     }))
     assert profile["gender"][1].values == ["diverse", "female", "male"]
     assert df["gender"].tolist() == [0, 2, 0, 2, 1]
     assert df["sex"].tolist() == [49, 55, 49, 2, 55]
+    assert df["numbers"].tolist() == [1000, 14, 42, 1000, 429]
 
 
 def test_pipeline():
     profile = ConversionProfile({
         "gender": [
-            lambda s: [ord(s[0]), ord(s[-1])], ("first", "last")
+            lambda s: [ord(s[0]), ord(s[-1])], Label("first", "last")
         ],
     })
     df = profile.fit_transform(pd.DataFrame({
@@ -154,10 +181,6 @@ def tests_lists():
 
     # correct values were computed
     assert df["name=tom"].tolist() == [True, False, True, False, False]
-
-
-def test_inference():
-    pass  # todo
 
 
 def test_multi_column():
