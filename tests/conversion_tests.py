@@ -183,6 +183,51 @@ def tests_lists():
     assert df["name=tom"].tolist() == [True, False, True, False, False]
 
 
+def test_function():
+    profile = ConversionProfile()
+
+    data = pd.DataFrame({
+        "Simple": ["HEY", "BYE", "HI", "BYE"],
+        "Multi 1-n": ["a b", "c d", "hi bye", "bye hi"],
+        "Ignore": [1, 2, 3, 4],
+        "Iterables": ["Hey", "Bye", "Hi", "Bye"],
+        "Simple Labels": ["Hey", "Bye", "Hi", "Bye"],
+        "Multi n-n": ["a b", "c d", "hi bye", "bye hi"],
+        "Func and Labels": ["a b", "c d", "hi bye", "bye hi"],
+    })
+
+    profile["Simple"] = str.lower
+    profile["Multi 1-n"] = lambda s: s.split(" ")
+    profile["Ignore"] = lambda s: []
+    profile["Iterables"] = lambda s: (s.lower(), s.upper())
+    profile["Simple Labels"] = [lambda s: [s.lower(), s.upper()], Label("Lower", "Upper")]
+    profile["Multi n-n"] = [lambda s: s.split(" "), lambda l: [l[1], l[0]]]
+    profile["Func and Labels"] = Function(transform=lambda s: s.split(" "),
+                                          labels=lambda s: [f"First of '{s}'", f"Second of '{s}'"])
+
+    profile.fit(data)
+
+    # test if labels were generated correctly
+    assert profile.column_names["Simple"] == ["Simple"]
+    assert profile.column_names["Multi 1-n"] == ["Multi 1-n_0", "Multi 1-n_1"]
+    assert profile.column_names["Ignore"] == []
+    assert profile.column_names["Iterables"] == ["Iterables_0", "Iterables_1"]
+    assert profile.column_names["Simple Labels"] == ["Lower", "Upper"]
+    assert profile.column_names["Multi n-n"] == ["Multi n-n_0", "Multi n-n_1"]
+    assert profile.column_names["Func and Labels"] == ["First of 'Func and Labels'", "Second of 'Func and Labels'"]
+
+    df = profile.transform(data)
+
+    # test values
+    assert df["Simple"].tolist() == ["hey", "bye", "hi", "bye"]
+    assert df["Multi 1-n_0"].tolist() == ["a", "c", "hi", "bye"]
+    assert df["Multi 1-n_1"].tolist() == ["b", "d", "bye", "hi"]
+    assert df["Iterables_0"].tolist() == ["hey", "bye", "hi", "bye"]
+    assert df["Iterables_1"].tolist() == ["HEY", "BYE", "HI", "BYE"]
+    assert df["Multi n-n_0"].tolist() == ["b", "d", "bye", "hi"]
+    assert df["Multi n-n_1"].tolist() == ["a", "c", "hi", "bye"]
+
+
 def test_multi_column():
     pass  # todo
 

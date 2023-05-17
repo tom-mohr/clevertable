@@ -302,35 +302,36 @@ There are only two classes that:
 
 Here's a quick overview of all converters:
 
-| Converters                  | Description                                                                       | Shorthand  | Example Usage                                                   |
-|-----------------------------|-----------------------------------------------------------------------------------|------------|-----------------------------------------------------------------|
-| Basic:                      |                                                                                   |            |                                                                 |
-| [`Float()`](#float)         | Converts numbers into floats.                                                     |            |                                                                 |
-| [`Enumerate()`](#enumerate) |                                                                                   |            |                                                                 |
-| [`OneHot()`](#onehot)       |                                                                                   |            |                                                                 |
-| [`Binary()`](#binary)       | Converts a column of text into a column of integers.                              |            |                                                                 |
-| [`List()`](#list)           |                                                                                   |            |                                                                 |
-| [`ListAndOr()`](#listandor) |                                                                                   |            |                                                                 |
-| [`Map()`](#map)             |                                                                                   | dict       | {<br>&nbsp;&nbsp;"foo": 1,<br>&nbsp;&nbsp;"bar": -2,<br>}       |
-| [`Const()`](#const)         | Returns a constant value.                                                         | *any*      | 42<br>"foo"                                                     |
-| Text Processing:            |                                                                                   |            |                                                                 |
-| [`Strip()`](#strip)         |                                                                                   |            |                                                                 |
-| [`Split()`](#split)         |                                                                                   |            |                                                                 |
-| Combining Converters:       |                                                                                   |            |                                                                 |
-| [`Pipeline()`](#pipeline)   | Applies multiple converters in sequence.                                          | list       | [<br>&nbsp;&nbsp;Split(),<br>&nbsp;&nbsp;ForEach(Strip()),<br>] |
-| [`Try()`](#try)             | Try multiple converters and returns the first one that succeeds.                  | tuple      | (Float(), Binary())                                             |
-| [`ForEach()`](#foreach)     | Apply the same converter to all items.                                            |            |                                                                 |
-| [`Parallel()`](#parallel)   | Apply different converters to the respective items.                               |            |                                                                 |
-| Special:                    |                                                                                   |            |                                                                 |
-| [`Id()`](#id)               |                                                                                   |            |                                                                 |
-| [`Ignore()`](#ignore)       | Drops the column.                                                                 | None       | None                                                            |
-| [`Infer()`](#infer)         |                                                                                   |            |                                                                 |
-| [`Label()`](#label)         |                                                                                   |            |                                                                 |
-| Dimensionality:             |                                                                                   |            |                                                                 |
-| [`Flatten()`](#flatten)     | Flattens a list of lists into a single list. This is often needed after ForEach() |            |                                                                 |
-| [`Transpose()`](#transpose) |                                                                                   |            |                                                                 |
-| Arbitrary Functions:        |                                                                                   |            |                                                                 |
-| [`Function()`](#function)   | Applies a user-defined function to the data.                                      | *callable* | lambda x: x**2                                                  |
+| Converters                            | Description                                                                         | Shorthand | Example Usage                                                   |
+|---------------------------------------|-------------------------------------------------------------------------------------|-----------|-----------------------------------------------------------------|
+| Basic:                                |                                                                                     |           |                                                                 |
+| [`Float()`](#float)                   | Convert numbers into floats.                                                        |           |                                                                 |
+| [`Enumerate()`](#enumerate)           |                                                                                     |           |                                                                 |
+| [`OneHot()`](#onehot)                 |                                                                                     |           |                                                                 |
+| [`Binary()`](#binary)                 | Convert a column of text into a column of integers.                                 |           |                                                                 |
+| [`List()`](#list)                     |                                                                                     |           |                                                                 |
+| [`ListAndOr()`](#listandor)           |                                                                                     |           |                                                                 |
+| [`Map()`](#map)                       |                                                                                     | dict      | {<br>&nbsp;&nbsp;"foo": 1,<br>&nbsp;&nbsp;"bar": -2,<br>}       |
+| [`Const()`](#const)                   | Return a constant value.                                                            | *any*     | 42<br>"foo"                                                     |
+| Text Processing:                      |                                                                                     |           |                                                                 |
+| [`Strip()`](#strip)                   |                                                                                     |           |                                                                 |
+| [`Split()`](#split)                   |                                                                                     |           |                                                                 |
+| Combining Converters:                 |                                                                                     |           |                                                                 |
+| [`Pipeline()`](#pipeline)             | Apply multiple converters in sequence.                                              | list      | [<br>&nbsp;&nbsp;Split(),<br>&nbsp;&nbsp;ForEach(Strip()),<br>] |
+| [`Try()`](#try)                       | Try multiple converters and return the first one that succeeds.                     | tuple     | (Float(), Binary())                                             |
+| [`ForEach()`](#foreach)               | Apply the same converter to all items.                                              |           |                                                                 |
+| [`Parallel()`](#parallel)             | Apply different converters to the respective items.                                 |           |                                                                 |
+| Special:                              |                                                                                     |           |                                                                 |
+| [`Id()`](#id)                         |                                                                                     |           |                                                                 |
+| [`Ignore()`](#ignore)                 | Drop the column.                                                                    | None      | None                                                            |
+| [`Infer()`](#infer)                   |                                                                                     |           |                                                                 |
+| [`Label()`](#label)                   |                                                                                     |           |                                                                 |
+| Dimensionality:                       |                                                                                     |           |                                                                 |
+| [`Flatten()`](#flatten)               | Flatten a list of lists into a single list. This is often needed after `ForEach()`. |           |                                                                 |
+| [`Transpose()`](#transpose)           |                                                                                     |           |                                                                 |
+| Arbitrary Functions:                  |                                                                                     |           |                                                                 |
+| [`Function()`](#function)             | Apply a user-defined function to the data.                                          | callable  | lambda x: x**2                                                  |
+| [`StrictFunction()`](#strictfunction) | Apply a user-defined function to the data. Less flexible than `Function()`.         |           |                                                                 |
 
 ---
 
@@ -666,7 +667,51 @@ across all list elements.
 
 ### Function
 
-This can be used to specify a custom conversion function.
+```python
+Function(transform, labels=None)
+```
+
+Shorthand: Instead of `Function(transform, None)`, just write `transform`, where `transform` is some callable.
+
+Creates a custom converter from a custom ``transform()`` function
+(and optionally, a custom ``labels()`` function).
+This is a handy way to create a converter that doesn't need ``fit()``.
+
+Unlike ``StrictFunction()``, this class can handle functions that don't accept or return lists,
+which often allows for more concise code.
+
+This is achieved during ``fit()`` as follows:
+
+1. If all incoming items are 1-element lists, it sets a flag ``UNPACK_OUTPUT`` to always
+   unpack the element before passing them to the wrapped function during ``transform()``.
+2. If during ``fit()`` the wrapped function doesn't return lists,
+   it tries to turn that output into a list:
+    - If the output is always a non-string iterable, it will simply set a
+      flag ``CONVERT_ITERABLE`` to always convert the iterable output into a list during ``transform()``.
+    - Otherwise, it sets a flag ``WRAP_OUTPUT`` to always wrap the output in a
+      1-element list during ``transform()``.
+
+A similar logic is applied to the labels.
+If a custom labels function is given, the following procedure is followed during ``labels()``:
+
+1. If the incoming labels are a 1-element list, the single label is unpacked before
+   it is passed to the custom labels function.
+2. If the custom labels function returns something other than a list,
+   this class tries to convert it into a list:
+    - If the output is a non-string iterable, it is converted into a list.
+    - Otherwise, the output is wrapped in a 1-element list.
+
+If no custom labels function is given, the output labels are generated based on the
+output cardinality inferred during ``fit()`` and according to the following logic:
+
+- If the number of incoming labels is identical to the output cardinality,
+  the labels will be returned unchanged.
+- Otherwise, the number of incoming labels must be 1 and the output labels are generated by adding suffixes
+  ``_0``, ``_1``, etc. to the single input label.
+
+A special case are functions returning output of varying cardinality during ``fit()``.
+In this case, a single input label is returned.
+If multiple input labels are given, they are joined with ``_``.
 
 The following example turns a text column into two columns containing the ascii code of the first and last letter.
 
@@ -689,7 +734,7 @@ You can also set the labels explicitly with a lambda function
 that takes the input column name as an argument and returns output column names:
 
 ```python
-"Name": Function(lambda x: (ord(x[0]), ord(x[-1])),
+"Name": Function(lambda x: [ord(x[0]), ord(x[-1])],
                  labels=lambda s: [f"ord(first letter of {s})", f"ord(last letter of {s})"]),
 ```
 
@@ -697,6 +742,41 @@ that takes the input column name as an argument and returns output column names:
 |-------|---|---------------------------|--------------------------|
 | Alice |   | 97                        | 101                      |
 | Bob   |   | 98                        | 98                       |
+
+However, remember that you can always simply use [`Label()`](#label) to rename the columns after the conversion,
+if you don't need the output column names to depend on the input column names.
+
+```python
+"Name": [lambda x: [ord(x[0]), ord(x[-1])],
+         Labels("ord(first letter)", "ord(last letter)")],
+```
+
+### StrictFunction
+
+```python
+StrictFunction(transform, labels=None)
+```
+
+Works mostly like [`Function()`](#function), but simpler:
+``transform`` and ``labels`` must both accept and return lists.
+Instead of something like this:
+
+```python
+"Name": str.lower,
+```
+
+you have to write this:
+
+```python
+"Name": StrictFunction(lambda x: [str.lower(x[0])])
+```
+
+That is, you will still receive 1-element lists as lists to the function,
+even if all input elements during `fit()` are 1-element lists.
+Also, you must now explicitly return a list,
+even if it is just a 1-element list, as otherwise an error will be raised.
+
+See [`Function()`](#function) for a convenient extension of this converter.
 
 ---
 

@@ -8,6 +8,7 @@ from .Enumerate import Enumerate
 from .Flatten import Flatten
 from .Float import Float
 from .ForEach import ForEach
+from .StrictFunction import StrictFunction
 from .Function import Function
 from .Id import Id
 from .Ignore import Ignore
