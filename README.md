@@ -78,7 +78,7 @@ Here are some examples on what you can do with CleverTable:
 
 # Tutorial
 
-Suppose you want to convert the following table of survey results into a 2D numpy array of numbers:
+Suppose you want to convert the following table of survey results in a 2D numpy array of numbers:
 
 | Country | Age | Diagnosis | Hospitalized | Education level | Symptoms        |
 |---------|-----|-----------|--------------|-----------------|-----------------|
