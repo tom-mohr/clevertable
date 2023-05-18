@@ -36,9 +36,9 @@ df = profile.fit_transform("datasets/survey.xlsx")  # transformed pandas.DataFra
 This is how CleverTable works:
 
 1. You create a new `profile = ConversionProfile()`.
-   Here, you can specify certain converters, but you don't have to.
+   Here, you can optionally specify certain converters.
 2. You call `profile.fit(data)` on a sample data set, which creates a fixed conversion profile.
-    - CleverTable chooses the best converter if you don't specify it.
+    - CleverTable chooses the best converter for each column if you don't specify it.
     - The converter (chosen by you or by CleverTable) adapts its internal state to fit the data.
 3. You call `profile.transform(data)` on the actual data set (which may be the same as for `fit()`),
    which converts the data according to the fixed profile.
