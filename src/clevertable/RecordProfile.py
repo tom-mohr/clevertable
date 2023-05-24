@@ -117,7 +117,13 @@ class RecordProfile(Converter):
             if key not in self.profile:
                 raise KeyError(f"Key not present in the profile: '{key}'")
             conv = self.profile[key]
-            out_vals: list = conv.transform([input_record[key]])
+            in_vals = [input_record[key]]
+            try:
+                out_vals: list = conv.transform(in_vals)
+            except Exception as e:
+                # add helpful context to error message
+                raise ValueError(f"Key '{key}': {conv.__class__.__name__} converter"
+                                 f" raised {e.__class__.__name__} during transform: {e}") from e
             out_keys = self.keys[key]
             assert len(out_vals) == len(out_keys), \
                 f"Key '{key}': Output length of {conv.__class__.__name__} converter" \
