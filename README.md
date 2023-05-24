@@ -27,13 +27,13 @@ df = profile.fit_transform("datasets/survey.xlsx")  # transformed pandas.DataFra
 # Why this Library?
 
 - CleverTable makes it really easy to convert text-based tabular data
-  (optionally mixed with numbers), e.g. a medical survey,
-  into numerical data, e.g. a Pandas DataFrame or a NumPy array.
+  (optionally mixed with numbers) into numerical data, e.g. a medical survey
+  into a Pandas DataFrame or a NumPy array.
 - If something is obvious, you should not need to specify it.
   CleverTable will try to make choices for you if you don't make them.
 - You stay in control: All choices made by CleverTable can be modified and overridden.
 
-This is how CleverTable works:
+This is how CleverTable works: (see below for a full [tutorial](#tutorial))
 
 1. You create a new `profile = ConversionProfile()`.
    Here, you can optionally specify certain converters.
