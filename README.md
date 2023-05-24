@@ -219,9 +219,8 @@ profile = ConversionProfile({
 
 Two final notes:
 
-- You can ignore columns by setting their converter to `Ignore()"`.
-- You can use `fit_transform()` to perform `fit()` and `transform()`
-  in one step on the same data.
+- You can ignore columns by setting their converter to `None` (which is shorthand for the `Ignore()` converter).
+- You can use `fit_transform()` to perform `fit()` and `transform()` with the same data in one call.
 
 This leaves us with this very concise code:
 
@@ -231,7 +230,7 @@ from clevertable import *
 df = ConversionProfile({
     "Country": OneHot(),
     "Diagnosis": Binary(positive="cancer", negative="benign"),
-    "Hospitalized": Ignore(),
+    "Hospitalized": None,
 }, pre_processing=None).fit_transform("datasets/survey.xlsx")
 ```
 
