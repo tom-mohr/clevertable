@@ -13,9 +13,4 @@ class Label(Id):
         return self.labels_
 
     def __repr__(self) -> str:
-        if len(self.labels_) == 1:
-            # prefer Label("foo") representation over ("foo",)
-            return f"Label({repr(self.labels_[0])})"
-
-        # tuples are parsed to Label()
-        return repr(tuple(self.labels_))
+        return f"Label({', '.join(repr(label) for label in self.labels_)})"
