@@ -29,6 +29,36 @@ def general_test():
         [0., 0., 0., 1., 0., 0., 34., 0., 0., 0., 1., 1., 1.]
     ])
 
+    assert arr.shape == correct_arr.shape
+    assert (arr == correct_arr).all()
+
+
+def test_ignore_undefined():
+    df = pd.DataFrame({
+        "Country": ["China", "France", "Italy", "Germany", "Nigeria", "India"],
+        "Age": [32, 45, 19, 56, 23, 34],
+        "Diagnosis": ["benign", "cancer", "benign", "cancer", "benign", "benign"],
+        "Hospitalized": ["no", "yes", "yes", "yes", "no", "yes"],
+        "Education level": ["University", "PhD", "High School", "High School", "University", "University"],
+        "Symptoms": ["cough, fever", "fever", "cough", "fever and cough", "", "cough, fever"],
+    })
+
+    arr = ConversionProfile({
+        "Age": Float(),
+        "Diagnosis": Binary(positive="cancer", negative="benign"),
+        "Hospitalized": Ignore(),
+    }, ignore_undefined=True, pre_processing=None).fit_transform(df).astype(float).to_numpy()
+
+    correct_arr = np.array([
+        [32., 0.],
+        [45., 1.],
+        [19., 0.],
+        [56., 1.],
+        [23., 0.],
+        [34., 0.]
+    ])
+
+    assert arr.shape == correct_arr.shape
     assert (arr == correct_arr).all()
 
 

@@ -1,4 +1,5 @@
 from .Converter import Converter
+from .Ignore import Ignore
 from .Infer import Infer
 from ._utils import _parse_converter, _flatten, _index_duplicates
 
@@ -13,6 +14,7 @@ def _check_and_unpack(row: list) -> dict:
 
 class RecordProfile(Converter):
     def __init__(self, profile: dict[any, any] = None,
+                 ignore_undefined: bool = False,
                  ignore_uninferrable: bool = False):
         """
         Works on records (dicts).
@@ -26,9 +28,10 @@ class RecordProfile(Converter):
         Keys that are not present in the profile and weren't present during fit() are simply ignored.
 
         :param profile: Maps keys to converters.
-        :param ignore_uninferrable:
-        If True, keys which are not present in the profile and for which the converter
-        cannot be inferred during fit() are ignored during transform().
+        :param ignore_undefined: If ``False``, all columns without a converter will be assigned a converter
+               automatically. If ``True``, these columns will be ignored instead, i.e. not produce any output columns.
+        :param ignore_uninferrable: If ``True``, keys which are not present in the profile and for which the converter
+               cannot be inferred during ``fit()`` are ignored during transform().
         """
         self.profile: dict[any, Converter] = {}
         if profile:
@@ -36,7 +39,8 @@ class RecordProfile(Converter):
 
         self.keys: dict[any, list[any]] = {}  # cache for the output keys computed during fit()
 
-        self.ingore_uninferrable = ignore_uninferrable
+        self.ignore_undefined = ignore_undefined
+        self.ignore_uninferrable = ignore_uninferrable
 
     def fit(self, rows: list[list]):
         # unpack each row and check the type
@@ -44,10 +48,13 @@ class RecordProfile(Converter):
 
         all_keys = {key for d in dicts for key in d.keys()}  # collect all possible keys present in the dicts
 
-        # replace missing converters with Infer()
+        # replace missing converters with Infer() or Ignore()
         for key in all_keys:
             if key not in self.profile:
-                self.profile[key] = Infer(ignore_uninferrable=self.ingore_uninferrable)
+                if self.ignore_undefined:
+                    self.profile[key] = Ignore()
+                else:
+                    self.profile[key] = Infer(ignore_uninferrable=self.ignore_uninferrable)
 
         # now actual fit
         for key, conv in self.profile.items():

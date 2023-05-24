@@ -9,6 +9,7 @@ from .RecordProfile import RecordProfile
 
 class DataFrameProfile:
     def __init__(self, profile: dict[str, any] = None,
+                 ignore_undefined: bool = False,
                  ignore_uninferrable: bool = False,
                  pre_processing: Optional[Callable[[any], any]] = str.lower):
         """
@@ -18,15 +19,17 @@ class DataFrameProfile:
         wrapped RecordProfile.
 
         :param profile: A dictionary that maps column names to converters.
-        :param ignore_uninferrable:
-        If True, there is no error when a column cannot be inferred, and it will be processed by an Ignore() converter,
-        leading to no output column.
-        :param pre_processing:
-        A function that is applied to each value before it is fed to the converters.
-        Every time the function fails (i.e. raises an exception), the original value is used.
+        :param ignore_undefined: If ``False``, all columns without a converter will be assigned a converter
+               automatically. If ``True``, these columns will be ignored instead, i.e. not produce any output columns.
+        :param ignore_uninferrable: If True, there is no error when a column cannot be inferred, and it will be
+               processed by an Ignore() converter, leading to no output column.
+        :param pre_processing: A function that is applied to each value before it is fed to the converters.
+               Every time the function fails (i.e. raises an exception), the original value is used.
         """
         self.pre_processing = pre_processing
-        self._record_profile = RecordProfile(profile, ignore_uninferrable=ignore_uninferrable)
+        self._record_profile = RecordProfile(profile,
+                                             ignore_undefined=ignore_undefined,
+                                             ignore_uninferrable=ignore_uninferrable)
 
     def fit(self, df: pd.DataFrame) -> 'DataFrameProfile':
         """

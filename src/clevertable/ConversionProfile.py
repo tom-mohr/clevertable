@@ -39,9 +39,10 @@ def default_preprocessing(val: any) -> any:
 
 class ConversionProfile(DataFrameProfile):
     def __init__(self, profile: dict[str, any] = None,
+                 ignore_undefined: bool = False,
                  ignore_uninferrable: bool = False,
                  pre_processing: Optional[Callable[[any], any]] = default_preprocessing):
-        super().__init__(profile, ignore_uninferrable, pre_processing)
+        super().__init__(profile, ignore_undefined, ignore_uninferrable, pre_processing)
 
     def fit(self, obj: pd.DataFrame | str) -> 'ConversionProfile':
         """
