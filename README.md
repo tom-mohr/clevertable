@@ -307,7 +307,7 @@ Here's a quick overview of all converters:
 | [`Float()`](#float)                   | Convert numbers into floats.                                                        |           |                                                                 |
 | [`Enumerate()`](#enumerate)           |                                                                                     |           |                                                                 |
 | [`OneHot()`](#onehot)                 |                                                                                     |           |                                                                 |
-| [`Binary()`](#binary)                 | Convert a column of text into a column of integers.                                 |           |                                                                 |
+| [`Binary()`](#binary)                 | Convert to 0 and 1. Detects common "positive" and "negative" terms in strings.      |           |                                                                 |
 | [`List()`](#list)                     |                                                                                     |           |                                                                 |
 | [`ListAndOr()`](#listandor)           |                                                                                     |           |                                                                 |
 | [`Map()`](#map)                       |                                                                                     | dict      | {<br>&nbsp;&nbsp;"foo": 1,<br>&nbsp;&nbsp;"bar": -2,<br>}       |
@@ -414,7 +414,7 @@ If no values are specified, the possible values are inferred from the data.
 
 ### Binary
 
-Similar to [`Enumerate()`](#enumerate), but only for columns with two possible values,
+Similar to [`Enumerate()`](#enumerate), but with just two possible values,
 and with some extra intelligence for this purpose.
 For example, it can detect words commonly used for positive and negative values:
 
@@ -442,7 +442,7 @@ Results in:
                        negative={"no", "false", "none"})
 ```
 
-You can also specify the positive and negative values via the `positive` and `negative` arguments:
+You can explicitly specify the values of the `positive` class and the `negative` class via the constructor:
 
 ```python
 "Hospitalized": Binary(positive="yes", negative="no")
@@ -455,8 +455,8 @@ You can also specify the positive and negative values via the `positive` and `ne
 | no           |   | 0            |
 | yes          |   | 1            |
 
-If only one value is specified, all other values present in the data
-are treated as instances of the other class:
+If only one argument is specified (either `positive` or `negative`),
+all other values present in the data are treated as instances of the other class:
 
 ```python
 "Time served": Binary(negative="none")
@@ -469,7 +469,7 @@ are treated as instances of the other class:
 | 4 years     |   | 1           |
 | none        |   | 0           |
 
-It is also possible to specify more than one values for the positive and negative values.
+It's also possible to specify more than one value for the ``positive`` and ``negative`` classes.
 Example:
 
 ```python
@@ -483,10 +483,10 @@ Example:
 | false        |   | 0            |
 | true         |   | 1            |
 
-If no positive or negative value is specified, a set of strings commonly used
+If no positive or negative values are specified, a set of strings commonly used
 to indicate positive / negative values is tested against the available data.
 For instance, in the example above, the specified arguments would have been
-identified automatically as positive and negative.
+inferred automatically as positive and negative.
 
 If this approach is not successful, the lexically smallest value is chosen as the `negative` argument and
 the `positive` argument is left empty, causing all other values to be treated as positive:
