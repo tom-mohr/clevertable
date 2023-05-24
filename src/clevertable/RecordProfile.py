@@ -116,22 +116,22 @@ class RecordProfile(Converter):
         for key in input_record:
             if key not in self.profile:
                 raise KeyError(f"Key not present in the profile: '{key}'")
-            conv = self.profile[key]
-            in_vals = [input_record[key]]
+            converter = self.profile[key]
+            input_values = [input_record[key]]
             try:
-                out_vals: list = conv.transform(in_vals)
+                output_values = converter.transform(input_values)
             except Exception as e:
                 # add helpful context to error message
-                raise ValueError(f"Key '{key}': {conv.__class__.__name__} converter"
+                raise ValueError(f"Key '{key}': {converter.__class__.__name__} converter"
                                  f" raised {e.__class__.__name__} during transform: {e}") from e
-            out_keys = self.keys[key]
-            assert len(out_vals) == len(out_keys), \
-                f"Key '{key}': Output length of {conv.__class__.__name__} converter" \
-                f" mismatches number of labels: {len(out_vals)}!={len(out_keys)}." \
+            output_keys = self.keys[key]
+            assert len(output_values) == len(output_keys), \
+                f"Key '{key}': Output length of {converter.__class__.__name__} converter" \
+                f" mismatches number of labels: {len(output_values)}!={len(output_keys)}." \
                 f"\n\tInput:\t{[input_record[key]]}" \
-                f"\n\tOutput (length {len(out_vals)}):\t{out_vals}" \
-                f"\n\tOutput Labels (length {len(out_keys)}):\t{out_keys}"
-            for out_val, out_key in zip(out_vals, out_keys):
+                f"\n\tOutput (length {len(output_values)}):\t{output_values}" \
+                f"\n\tOutput Labels (length {len(output_keys)}):\t{output_keys}"
+            for out_val, out_key in zip(output_values, output_keys):
                 output_record[out_key] = out_val
         return [output_record]
 
