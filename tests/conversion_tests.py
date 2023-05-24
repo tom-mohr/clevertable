@@ -93,6 +93,27 @@ def test_parsing():
     assert type(profile["Test Const"]) is Const
 
 
+def test_binary():
+    df = pd.DataFrame({
+        "Diagnosis": ["benign", "cancer", "benign", "cancer", "benign", "benign"],
+        "Country": ["China", "France", "Italy", "Germany", "Nigeria", "India"],
+        "Age": [32, 45, 19, 56, 23, 34],
+        "Hospitalized": ["no", "yes", "yes", "yes", "no", "yes"],
+    })
+
+    df = ConversionProfile({
+        "Diagnosis": Binary(positive="cancer", negative="benign"),
+        "Country": Binary(positive={"France", "India"}),
+        "Age": Binary(negative=[23, 24]),
+        "Hospitalized": Binary(),
+    }, pre_processing=None).fit_transform(df)
+
+    assert df["Country"].tolist() == [0, 1, 0, 0, 0, 1]
+    assert df["Age"].tolist() == [1, 1, 1, 1, 0, 1]
+    assert df["Diagnosis"].tolist() == [0, 1, 0, 1, 0, 0]
+    assert df["Hospitalized"].tolist() == [0, 1, 1, 1, 0, 1]
+
+
 def test_try():
     profile = ConversionProfile({
         "gender": [Try({"div": "diverse"}),

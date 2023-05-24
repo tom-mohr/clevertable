@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Iterable
+
 from .Converter import Converter
 
 _COMMON_POSITIVE_STRINGS = {"yes", "true", "positive", "1", "female"}
@@ -9,23 +11,35 @@ _COMMON_NEGATIVE_STRINGS = {"no", "false", "negative", "0", "male", "none"}
 class Binary(Converter):
 
     def __init__(self,
-                 positive: set | str = None,
-                 negative: set | str = None):
+                 positive: any = None,
+                 negative: any = None):
         """
         Converts values to 0 or 1.
+        :param positive: A value or an iterable of values that should be considered positive.
+        ``None`` is equivalent to passing an empty iterable.
+        :param negative: A value or an iterable of values that should be considered negative.
+        ``None`` is equivalent to passing an empty iterable.
         """
         # save args for __repr__
         self.__args_positive = positive
         self.__args_negative = negative
 
-        # wrap single values in sets
-        if type(positive) is str:
-            positive = {positive}
-        if type(negative) is str:
-            negative = {negative}
+        if positive is None:
+            positive = set()  # empty set
+        elif isinstance(positive, Iterable) and not isinstance(positive, str):  # non-string iterable
+            positive = set(positive)  # ensure set
+        else:
+            positive = {positive}  # wrap single value in set
 
-        self.positive: set = positive or set()
-        self.negative: set = negative or set()
+        if negative is None:
+            negative = set()  # empty set
+        elif isinstance(negative, Iterable) and not isinstance(negative, str):  # non-string iterable
+            negative = set(negative)  # ensure set
+        else:
+            negative = {negative}  # wrap single value in set
+
+        self.positive: set = positive
+        self.negative: set = negative
 
     def fit(self, rows: list[list]):
         if self.positive or self.negative:
