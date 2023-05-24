@@ -38,9 +38,4 @@ class Parallel(Converter):
         return [conv.transform([val]) for val, conv in zip(row, self.converters)]
 
     def __repr__(self):
-        if len(self.converters) == 1:
-            # prefer Parallel(conv) representation over (conv,)
-            return f"Parallel({repr(self.converters[0])})"
-
-        # tuples are parsed to converters
-        return repr(tuple(self.converters))
+        return f"Parallel({', '.join(repr(conv) for conv in self.converters)})"
