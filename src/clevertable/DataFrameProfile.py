@@ -49,7 +49,11 @@ class DataFrameProfile:
         dicts = df.to_dict(orient="records")
         transformed_dicts = []
         for i, d in enumerate(dicts):
-            d = self.transform_single(d)
+            try:
+                d = self.transform_single(d)
+            except Exception as e:
+                # add helpful context to error message
+                raise Exception(f"Error during transform() of row {i}: {e}") from e
             transformed_dicts.append(d)
         return pd.DataFrame.from_records(transformed_dicts)
 
