@@ -30,11 +30,13 @@ class Parallel(Converter):
                 self.converters[i] = conv.inferred
 
     def labels(self, labels: list) -> list:
+        assert isinstance(labels, list)
         assert len(labels) == len(self.converters)
         return [conv.labels([label]) for label, conv in zip(labels, self.converters)]
 
     def transform(self, row: list) -> list:
-        assert len(row) == len(self.converters)
+        assert len(row) == len(self.converters), \
+            f"Parallel converter expected {len(self.converters)} elements, but got {len(row)}: {row}"
         return [conv.transform([val]) for val, conv in zip(row, self.converters)]
 
     def __repr__(self):

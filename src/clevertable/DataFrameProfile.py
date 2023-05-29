@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from textwrap import indent
 from typing import Callable, Optional
 
 import pandas as pd
@@ -53,7 +54,8 @@ class DataFrameProfile:
                 d = self.transform_single(d)
             except Exception as e:
                 # add helpful context to error message
-                raise Exception(f"Error during transform() of row {i}: {e}") from e
+                raise Exception(f"Error during transform() of row {i}:\n"
+                                f"{indent(str(e), ' ' * 4)}") from e
             transformed_dicts.append(d)
         return pd.DataFrame.from_records(transformed_dicts)
 

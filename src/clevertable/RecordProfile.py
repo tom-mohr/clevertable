@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+from textwrap import indent
+from typing import Callable
+
 from .Converter import Converter
 from .Ignore import Ignore
 from .Infer import Infer
@@ -60,7 +65,7 @@ class RecordProfile(Converter):
         for key, conv in self.profile.items():
             rows = [[d[key]] for d in dicts if key in d]
             if not rows:
-                raise ValueError(f"Not a single value for key '{key}' present int fit()!"
+                raise ValueError(f"Not a single value for key {repr(key)} present int fit()!"
                                  f" You must at least provide one value to fit() for this key.")
                 pass
 
@@ -68,14 +73,15 @@ class RecordProfile(Converter):
                 conv.fit(rows)
             except Exception as e:
                 # add helpful context to error message
-                raise ValueError(f"Key '{key}': {conv.__class__.__name__} converter"
-                                 f" raised {e.__class__.__name__} during fit: {e}") from e
+                raise ValueError(f"at key {repr(key)}:\n"
+                                 f"{e.__class__.__name__} during {conv.__class__.__name__}.fit():\n"
+                                 f"{indent(str(e), ' ' * 4)}") from e
 
         # replace all Infer() converters with the nested inferred converter
         for key, conv in self.profile.items():
             if isinstance(conv, Infer):
                 assert conv.inferred is not None, \
-                    f"Infer() converter for key '{key}' did not infer a converter during fit()"
+                    f"Infer() converter for key {repr(key)} did not infer a converter during fit()"
                 self.profile[key] = conv.inferred
 
         # save the output keys
@@ -84,8 +90,9 @@ class RecordProfile(Converter):
                 self.keys[key] = conv.labels([key])
             except Exception as e:
                 # add helpful context to error message
-                raise ValueError(f"Key '{key}': {conv.__class__.__name__} converter"
-                                 f" raised {e.__class__.__name__} during label computation: {e}") from e
+                raise ValueError(f"at key {repr(key)}:\n"
+                                 f"{e.__class__.__name__} during {conv.__class__.__name__}.labels():\n"
+                                 f"{indent(str(e), ' ' * 4)}") from e
 
         # handle duplicate output keys
         input_keys = list(self.keys.keys())
@@ -122,11 +129,12 @@ class RecordProfile(Converter):
                 output_values = converter.transform(input_values)
             except Exception as e:
                 # add helpful context to error message
-                raise ValueError(f"Key '{key}': {converter.__class__.__name__} converter"
-                                 f" raised {e.__class__.__name__} during transform: {e}") from e
+                raise ValueError(f"at key {repr(key)}:\n"
+                                 f"{e.__class__.__name__} during {converter.__class__.__name__}.transform():\n"
+                                 f"{indent(str(e), ' ' * 4)}") from e
             output_keys = self.keys[key]
             assert len(output_values) == len(output_keys), \
-                f"Key '{key}': Output length of {converter.__class__.__name__} converter" \
+                f"at {repr(key)}: Output length of {converter.__class__.__name__} converter" \
                 f" mismatches number of labels: {len(output_values)}!={len(output_keys)}." \
                 f"\n\tInput:\t{[input_record[key]]}" \
                 f"\n\tOutput (length {len(output_values)}):\t{output_values}" \
