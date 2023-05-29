@@ -279,8 +279,22 @@ def test_function():
     assert df["Multi n-n_1"].tolist() == ["a", "c", "hi", "bye"]
 
 
-def test_multi_column():
-    pass  # todo
+def test_function_label_generation():
+    df = pd.DataFrame({
+        "Column 1": [1, 2, 7, 8],
+        "Column 2": [5, 6, 3, 4],
+        "Column 3": [13, 14, 1, 2],
+    })
+
+    profile = ConversionProfile()
+    profile["Column 1", "Column 2"] = min
+    profile[("Column 1", "Column 2"), "Column 3"] = [Parallel(min, Id()), Flatten(), max]
+
+    profile.fit(df)
+
+    # label generation
+    assert profile.column_names["Column 1", "Column 2"] == ["Column 1, Column 2"]
+    assert profile.column_names[("Column 1", "Column 2"), "Column 3"] == ["['Column 1', 'Column 2'], Column 3"]
 
 
 def test_duplicated_column_names():
@@ -296,3 +310,25 @@ def test_add_to_pipeline():
     assert type(profile["Test"][0]) == Float
     assert type(profile["Test"][1]) == Binary
     assert type(profile["Test"][2]) == OneHot
+
+
+def test_parallel():
+    pass  # todo
+
+
+def test_record_multi_column():
+    df = pd.DataFrame({
+        "Column 1": [1, 2, 7, 8],
+        "Column 2": [5, 6, 3, 4],
+        "Column 3": [13, 14, 1, 2],
+    })
+
+    profile = ConversionProfile()
+    profile["Column 1", "Column 2"] = [min, Label("A")]
+    profile[("Column 1", "Column 2"), "Column 3"] = [Parallel(min, Id()), Flatten(), max, Label("B")]
+
+    profile.fit(df)
+    df = profile.transform(df)
+
+    assert df["A"].tolist() == [1, 2, 3, 4]
+    assert df["B"].tolist() == [13, 14, 3, 4]

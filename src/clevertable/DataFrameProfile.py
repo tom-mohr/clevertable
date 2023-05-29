@@ -77,7 +77,7 @@ class DataFrameProfile:
         return self
 
     @property
-    def column_names(self) -> dict[str, list]:
+    def column_names(self) -> dict[any, list]:
         """
         A dictionary that maps input column names to output column names.
         Note that the output column names are lists, even if there is only a single
