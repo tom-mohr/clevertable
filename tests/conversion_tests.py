@@ -147,7 +147,7 @@ def test_try():
             "429",
         ],
     }))
-    assert profile["gender"][1].values == ["diverse", "female", "male"]
+    assert profile["gender"][1].values == ("diverse", "female", "male")
     assert df["gender"].tolist() == [0, 2, 0, 2, 1]
     assert df["sex"].tolist() == [49, 55, 49, 2, 55]
     assert df["numbers"].tolist() == [1000, 14, 42, 1000, 429]
@@ -225,10 +225,10 @@ def tests_lists():
     assert type(profile["name2"]) is List
 
     # correct columns were created
-    assert profile["name"][0].values == ["jane", "john", "tom"]
-    assert profile.column_names["name"] == ["name=jane", "name=john", "name=tom"]
-    assert profile["name2"][0].values == ["jane", "john", "tom"]
-    assert profile.column_names["name2"] == ["name2=jane", "name2=john", "name2=tom"]
+    assert profile["name"][0].values == ("jane", "john", "tom")
+    assert profile.column_names["name"] == ("name=jane", "name=john", "name=tom")
+    assert profile["name2"][0].values == ("jane", "john", "tom")
+    assert profile.column_names["name2"] == ("name2=jane", "name2=john", "name2=tom")
 
     # correct values were computed
     assert df["name=tom"].tolist() == [True, False, True, False, False]
@@ -259,13 +259,13 @@ def test_function():
     profile.fit(data)
 
     # test if labels were generated correctly
-    assert profile.column_names["Simple"] == ["Simple"]
-    assert profile.column_names["Multi 1-n"] == ["Multi 1-n_0", "Multi 1-n_1"]
-    assert profile.column_names["Ignore"] == []
-    assert profile.column_names["Iterables"] == ["Iterables_0", "Iterables_1"]
-    assert profile.column_names["Simple Labels"] == ["Lower", "Upper"]
-    assert profile.column_names["Multi n-n"] == ["Multi n-n_0", "Multi n-n_1"]
-    assert profile.column_names["Func and Labels"] == ["First of 'Func and Labels'", "Second of 'Func and Labels'"]
+    assert profile.column_names["Simple"] == ("Simple",)
+    assert profile.column_names["Multi 1-n"] == ("Multi 1-n_0", "Multi 1-n_1")
+    assert profile.column_names["Ignore"] == ()
+    assert profile.column_names["Iterables"] == ("Iterables_0", "Iterables_1")
+    assert profile.column_names["Simple Labels"] == ("Lower", "Upper")
+    assert profile.column_names["Multi n-n"] == ("Multi n-n_0", "Multi n-n_1")
+    assert profile.column_names["Func and Labels"] == ("First of 'Func and Labels'", "Second of 'Func and Labels'")
 
     df = profile.transform(data)
 
@@ -293,8 +293,8 @@ def test_function_label_generation():
     profile.fit(df)
 
     # label generation
-    assert profile.column_names["Column 1", "Column 2"] == ["Column 1, Column 2"]
-    assert profile.column_names[("Column 1", "Column 2"), "Column 3"] == ["['Column 1', 'Column 2'], Column 3"]
+    assert profile.column_names["Column 1", "Column 2"] == ("Column 1, Column 2",)
+    assert profile.column_names[("Column 1", "Column 2"), "Column 3"] == ("('Column 1', 'Column 2'), Column 3",)
 
 
 def test_duplicated_column_names():

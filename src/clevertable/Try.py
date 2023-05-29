@@ -21,7 +21,7 @@ class Try(Converter):
             self.exceptions = tuple(exceptions)
         self.converters = [_parse_converter(conv) for conv in converters]
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         convs = list(self.converters)
         while convs:
             conv = convs.pop(0)
@@ -30,7 +30,7 @@ class Try(Converter):
             if not convs:
                 return  # no need to transform with last converter
 
-            next_rows = []  # values that raise an exception
+            next_rows: list[tuple] = []  # values that raise an exception
             for row in rows:
                 try:
                     conv.transform(row)
@@ -51,12 +51,12 @@ class Try(Converter):
                     f"Infer() converter for did not infer a converter during fit()"
                 self.converters[i] = conv.inferred
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         if self.converters:
             return self.converters[0].labels(labels)
         return labels
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         for conv in self.converters:
             try:
                 return conv.transform(row)

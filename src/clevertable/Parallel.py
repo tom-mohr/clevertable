@@ -13,13 +13,13 @@ class Parallel(Converter):
         """
         self.converters = [_parse_converter(conv) for conv in converters]
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
 
         # transpose rows
         cols = list(zip(*rows))
 
         for conv, col in zip(self.converters, cols):
-            values = [[val] for val in col]  # each row must be a list
+            values = [(val,) for val in col]  # each row must be a tuple
             conv.fit(values)
 
         # replace all Infer converters with the nested inferred converter
@@ -29,15 +29,15 @@ class Parallel(Converter):
                     f"Infer() converter at index {i} did not infer a converter during fit()"
                 self.converters[i] = conv.inferred
 
-    def labels(self, labels: list) -> list:
-        assert isinstance(labels, list)
+    def labels(self, labels: tuple) -> tuple:
+        assert isinstance(labels, tuple)
         assert len(labels) == len(self.converters)
-        return [conv.labels([label]) for label, conv in zip(labels, self.converters)]
+        return tuple(conv.labels((label,)) for label, conv in zip(labels, self.converters))
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         assert len(row) == len(self.converters), \
             f"Parallel converter expected {len(self.converters)} elements, but got {len(row)}: {row}"
-        return [conv.transform([val]) for val, conv in zip(row, self.converters)]
+        return tuple(conv.transform((val,)) for val, conv in zip(row, self.converters))
 
     def __repr__(self):
         return f"Parallel({', '.join(repr(conv) for conv in self.converters)})"

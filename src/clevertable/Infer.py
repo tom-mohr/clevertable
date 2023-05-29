@@ -19,7 +19,7 @@ class Infer(Converter):
     def __getitem__(self, item):
         return self.inferred[item]
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         """
         Tries to infer this converter from the given data.
         If a converter could be inferred, it is fitted with the data and stored in self.inferred.
@@ -33,14 +33,14 @@ class Infer(Converter):
             raise e
         self.inferred.fit(rows)
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         return self.inferred.labels(labels)
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         return self.inferred.transform(row)
 
 
-def _infer_converter_from_data(rows: list[list]) -> Converter:
+def _infer_converter_from_data(rows: list[tuple]) -> Converter:
     """Tries to infer the best converter from the given data.
     If no converter can be inferred, a ValueError is raised."""
     # dynamic imports in order to break circular dependency
@@ -51,14 +51,14 @@ def _infer_converter_from_data(rows: list[list]) -> Converter:
     from .List import List, ListAndOr
     from .OneHot import OneHot
 
-    # if only contains 1-element lists
+    # if only contains 1-element rows:
     if all(len(row) == 1 for row in rows):
 
         values = [row[0] for row in rows]  # unpack 1-element rows
 
         # if only contains numbers:
-        if all([isinstance(val, numbers.Number) or val in (None, "") or _try_float(val) is not None
-                for val in values]):
+        if all(isinstance(val, numbers.Number) or val in (None, "") or _try_float(val) is not None
+               for val in values):
             return Float()
 
         # since numerical approach failed,

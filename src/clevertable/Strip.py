@@ -22,11 +22,11 @@ class Strip(Converter):
         fixes = list(prefixes) + list(suffixes)
         self.regex = "|".join(fixes)
 
-    def transform(self, row: list) -> list:
-        val = row[0]  # unpack 1-element list
+    def transform(self, row: tuple) -> tuple:
+        val = row[0]  # unpack 1-element row
         if not isinstance(val, str):
             raise ValueError(f"Strip() can only be applied to strings, not to value of type {type(val)}: {val}")
-        return [re.sub(self.regex, "", val)]
+        return (re.sub(self.regex, "", val),)
 
     def __repr__(self):
         if self.__default_args:

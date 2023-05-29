@@ -6,39 +6,38 @@ from typing import Callable
 from .Converter import Converter
 from .Ignore import Ignore
 from .Infer import Infer
-from ._utils import _parse_converter, _flatten, _index_duplicates
+from ._utils import _parse_converter, _flatten_tuples, _index_duplicates
 
 
-def _check_and_unpack(row: list) -> dict:
-    # unpack a 1-element list with a dict
-    assert len(row) == 1, "Expects a 1-element list with a dict"
-    val = row[0]  # unpack 1-element list
-    assert isinstance(val, dict), "Expects a 1-element list with a dict"
+def _check_and_unpack(row: tuple) -> dict:
+    # unpack a 1-element tuple with a dict
+    assert len(row) == 1, "Expects a 1-element tuple with a dict"
+    val = row[0]  # unpack 1-element tuple
+    assert isinstance(val, dict), "Expects a 1-element tuple with a dict"
     return val
 
 
 def _getitem_nested(key: any, getitem_func: Callable[[any], any]) -> any:
     """Key can be an atomic key or a tuple of keys.
     If present, the nested key structure is preserved in the output.
-    However, the output uses lists instead of tuples to represent the nested structure.
     Example::
         >>> d = {'a': 1, 'b': 2, 'c': 3}
         >>> _getitem_nested('a', d.get)
         1
         >>> _getitem_nested(('a', 'b'), d.get)
-        [1, 2]
+        (1, 2)
         >>> _getitem_nested(('a', ('b', 'c'), 'a'), d.get)
-        [1, [2, 3], 1]
+        (1, (2, 3), 1)
         >>> _getitem_nested(('a', 'a', 'a'), d.get)
-        [1, 1, 1]
+        (1, 1, 1)
         >>> _getitem_nested(('a',), d.get)
-        [1]
+        (1,)
 
     :param key: The key to lookup. May be an atomic key or a tuple of keys.
     :param getitem_func: The lookup function. Takes an atomic key and returns the value.
     """
     if isinstance(key, tuple):
-        return [_getitem_nested(k, getitem_func) for k in key]
+        return tuple(_getitem_nested(k, getitem_func) for k in key)
     return getitem_func(key)
 
 
@@ -46,12 +45,6 @@ def _contains_nested(key: any, contains_func: Callable[[any], any]) -> any:
     if isinstance(key, tuple):
         return all(_contains_nested(k, contains_func) for k in key)
     return contains_func(key)
-
-
-def _nested_tuple_to_list(key: any) -> any:
-    if isinstance(key, tuple):
-        return [_nested_tuple_to_list(k) for k in key]
-    return key
 
 
 class RecordProfile(Converter):
@@ -79,12 +72,12 @@ class RecordProfile(Converter):
         if profile:
             self.update(profile)  # parses converters
 
-        self.keys: dict[any, list] = {}  # cache for the output keys computed during fit()
+        self.keys: dict[any, tuple] = {}  # cache for the output keys computed during fit()
 
         self.ignore_undefined = ignore_undefined
         self.ignore_uninferrable = ignore_uninferrable
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         # unpack each row and check the type
         dicts = [_check_and_unpack(row) for row in rows]
 
@@ -108,7 +101,7 @@ class RecordProfile(Converter):
                 ]
             else:
                 rows = [
-                    [d[key]]  # wrap single element (row needs to be a list)
+                    (d[key],)  # wrap single element (row needs to be a tuple)
                     for d in dicts
                     if key in d
                 ]
@@ -136,9 +129,9 @@ class RecordProfile(Converter):
         for key, conv in self._profile.items():
             try:
                 if isinstance(key, tuple):
-                    input_labels = _nested_tuple_to_list(key)
+                    input_labels = key
                 else:
-                    input_labels = [key]
+                    input_labels = (key,)
                 output_labels = conv.labels(input_labels)
                 self.keys[key] = output_labels
             except Exception as e:
@@ -149,7 +142,8 @@ class RecordProfile(Converter):
 
         # handle duplicate output keys
         input_keys = list(self.keys.keys())
-        output_keys_flat = _flatten([self.keys[k] for k in self.keys])  # not using self.keys.values() because of order
+        output_keys_flat = _flatten_tuples(tuple(self.keys[k]  # not using self.keys.values() because of order
+                                                 for k in self.keys))
         output_keys_flat = _index_duplicates(output_keys_flat, lambda s, i: f"{s}_{i}")
         # "unflatten" the output keys and write them back
         for input_key in input_keys:
@@ -157,18 +151,18 @@ class RecordProfile(Converter):
             self.keys[input_key] = output_keys_flat[:n]  # take n first
             output_keys_flat = output_keys_flat[n:]  # remove n first
 
-    def labels(self, labels: list) -> [dict[any, list]]:
+    def labels(self, labels: tuple) -> (dict[any, tuple],):
         """
         :param labels: Will be ignored, as labels have been inferred from the given records during fit() already.
         """
-        return [self.keys]
+        return (self.keys,)
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         """
         Transforms each value in the given dict with the respective converter.
         The returned dict has the same keys as the input dict.
 
-        :param row: Must be a 1-element list with a dict
+        :param row: Must be a 1-element tuple with a dict
         :return:
         """
         input_record = _check_and_unpack(row)
@@ -176,7 +170,7 @@ class RecordProfile(Converter):
         for key, converter in self._profile.items():
             input_values = _getitem_nested(key, input_record.__getitem__)
             if not isinstance(key, tuple):
-                input_values = [input_values]
+                input_values = (input_values,)
             try:
                 output_values = converter.transform(input_values)
             except Exception as e:
@@ -193,7 +187,7 @@ class RecordProfile(Converter):
                 f"\n\tOutput Labels (length {len(output_keys)}):\t{output_keys}"
             for out_val, out_key in zip(output_values, output_keys):
                 output_record[out_key] = out_val
-        return [output_record]
+        return (output_record,)
 
     def update(self, profile: dict[str, any]):
         for key, value in profile.items():

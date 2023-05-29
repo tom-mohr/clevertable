@@ -19,11 +19,11 @@ class Split(Converter):
             self.__default_args = False
         self.regex = "|".join(delimiters)
 
-    def transform(self, row: list) -> list[str]:
-        val = row[0]  # unpack 1-element list
+    def transform(self, row: tuple) -> tuple[str]:
+        val = row[0]  # unpack 1-element row
         if not isinstance(val, str):
             raise ValueError(f"Split() can only be applied to strings, not to value of type {type(val)}: {val}")
-        return re.split(self.regex, val)
+        return tuple(re.split(self.regex, val))
 
     def __repr__(self):
         if self.__default_args:

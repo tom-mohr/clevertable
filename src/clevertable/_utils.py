@@ -41,21 +41,12 @@ def _ensure_list(obj: list | None | str | Iterable | any) -> list:
     return [obj]
 
 
-def _replace_none_recursively(obj: any, replacement: any) -> any:
-    # only works for lists!
-    if obj is None:
-        return replacement
-    if isinstance(obj, list):
-        return [_replace_none_recursively(o, replacement) for o in obj]
-    return obj
-
-
-def _index_duplicates(labels: list[str], index_func: Callable[[str, int], str]) -> list[str]:
+def _index_duplicates(labels: tuple[str], index_func: Callable[[str, int], str]) -> tuple[str]:
     """
     Add index suffix to all duplicate strings.
     This is done repeatedly until no duplicates are left,
     i.e. the returned list is guaranteed to have no duplicates.
-    :param labels: List of strings, may contain duplicates.
+    :param labels: Tuple of strings, may contain duplicates.
     :param index_func: (label, occurrence_count) -> new_label
     :return:
     """
@@ -67,13 +58,15 @@ def _index_duplicates(labels: list[str], index_func: Callable[[str, int], str]) 
     while len(set(labels)) != len(labels):  # while duplicates are present
         counts = {label: labels.count(label) for label in set(labels)}
         occurrence_count = {label: 0 for label in set(labels)}
+        labels = list(labels)  # need write access
         for i, label in enumerate(labels):
             count = counts[label]
             occurrence_count[label] += 1
             if count > 1:
                 labels[i] = index_func(label, occurrence_count[label])
+        labels = tuple(labels)
     return labels
 
 
-def _flatten(list_of_lists: list[list]) -> list:
-    return [e for inner_list in list_of_lists for e in inner_list]
+def _flatten_tuples(tuple_of_tuples: tuple[tuple]) -> tuple:
+    return tuple(e for inner_list in tuple_of_tuples for e in inner_list)

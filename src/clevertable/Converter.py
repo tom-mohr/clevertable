@@ -8,7 +8,7 @@ class Converter(ABC):
     Base class for all converters.
     A converter is used to convert a single column of data into one or multiple columns of data."""
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         """The converter is presented representative sample data.
         In this method, the converter should adapt its internal state so that there will
         be no errors when transform() is called with the same data.
@@ -19,17 +19,17 @@ class Converter(ABC):
         """
         pass
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         """Returns the labels that should be associated with the output data of this converter.
         For top-level converters, this will result in the names of the output columns.
         If the converter only results in one output column, this method should still return the
-        name of the output column as a 1-element list.
+        name of the output column as a 1-element tuple.
 
         This method can be called as soon this converter's fit() method has been called.
 
         For converters for which the values returned by transform() vary in size even after fit() was called,
-        this method can simply return a list of labels whose length matches the length of one possible output.
-        This could for example simply be a one-element list.
+        this method can simply return a tuple of labels whose length matches the length of one possible output.
+        This could for example simply be a one-element tuple.
         If these converters are not used as top-level converters, this is not a problem if other converters
         handle this output further and ensure a constant output size.
 
@@ -39,24 +39,23 @@ class Converter(ABC):
         By default, this method simply returns the given labels unchanged.
 
         :param labels: The labels of the input data.
-                       For top-level converters, this is a 1-element list containing the name of the
+                       For top-level converters, this is a 1-element tuple containing the name of the
                        original column that will be converted.
         """
         return labels
 
     @abstractmethod
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         """
-        Transforms a list of input values into a list of output values.
-        Input and output may be of different size, but they must be lists.
-        I.e. if the input is a single value, it will still be passed to this method as a 1-element list.
-        If the output is a single value, it must still be returned as a 1-element list.
+        Transforms a tuple of input values into a tuple of output values.
+        Input and output may be of different size, but they must be tuples.
+        I.e. if the input is a single value, it will still be passed to this method as a 1-element tuple.
+        If the output is a single value, it must still be returned as a 1-element tuple.
 
-        For top-level converters, the input will always be a 1-element list,
-        and the size of the output will determine the number of columns in the converted table
+        For top-level converters, the length of the output will determine the number of columns in the converted table
         resulting from this converter.
 
-        :param row: List of values to be converted. Single values will be passed as 1-element lists.
+        :param row: Tuple of values to be converted. Single values will be passed as 1-element tuples.
         """
         raise NotImplementedError()
 

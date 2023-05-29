@@ -37,7 +37,7 @@ class StrictFunction(Converter):
 
         self._output_cardinality: int = None
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         # infer output cardinality (only needed if no labels function is given)
         if self._labels is None:
             rows = [self._transform(row) for row in rows]
@@ -48,28 +48,30 @@ class StrictFunction(Converter):
                 self._output_cardinality = -1  # a value of -1 represents varying output cardinality
                 return
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         return self._transform(row)
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         if self._labels is not None:
             return self._labels(labels)  # use custom labels function
 
         if self._output_cardinality == -1:  # -1 represents varying output cardinality
-            return [", ".join(str(x) for x in labels)]
+            s = ", ".join(str(x) for x in labels)
+            return (s,)
 
         if len(labels) == self._output_cardinality:
             return labels
 
         if self._output_cardinality == 0:
-            return []
+            return ()
 
         if self._output_cardinality == 1:
-            return [", ".join(str(x) for x in labels)]
+            s = ", ".join(str(x) for x in labels)
+            return (s,)
 
         if len(labels) == 1:
             label = labels[0]
-            return [f"{label}_{i}" for i in range(self._output_cardinality)]
+            return tuple(f"{label}_{i}" for i in range(self._output_cardinality))
 
         raise ValueError(f"Cannot generate {self._output_cardinality} output labels"
                          f" from {len(labels)} input labels: {repr(labels)}")

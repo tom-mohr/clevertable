@@ -41,7 +41,7 @@ class Binary(Converter):
         self.positive: set = positive
         self.negative: set = negative
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         if self.positive or self.negative:
             # at least either one positive or negative value was passed to the constructor,
             # -> no need to infer them from the data
@@ -66,17 +66,17 @@ class Binary(Converter):
         # -> simply pick the lexically smallest value as negative
         self.negative = {sorted(values)[0]}
 
-    def transform(self, row: list) -> list:
-        val = row[0]  # unpack 1-element list
+    def transform(self, row: tuple) -> tuple:
+        val = row[0]  # unpack 1-element tuple
 
         if self.positive and self.negative:
             # ensure the value is either in positive or in negative
             if val not in self.positive and val not in self.negative:
                 raise ValueError(f"Value '{val}' is neither in the positive nor in the negative values.")
         if self.positive:
-            return [int(val in self.positive)]
+            return (int(val in self.positive),)
         else:
-            return [1 - int(val in self.negative)]
+            return (1 - int(val in self.negative),)
 
     def __repr__(self):
         args = []

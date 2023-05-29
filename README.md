@@ -148,7 +148,7 @@ We can access the individual converters and their properties by indexing the pro
 country_converter = profile["Country"]  # Enumerate('china', 'france', 'germany', ...)
 
 # see which integer corresponds to which country:
-countries_list = country_converter.values  # ['china', 'france', 'germany', ...]
+countries_list = country_converter.values  # ('china', 'france', 'germany', ...)
 ```
 
 You can now use this profile to convert data:
@@ -395,7 +395,7 @@ The possible values can be passed to the constructor:
 | italy   |   | 2       |
 | germany |   | 1       |
 
-Their index in the list is used as the numerical value.
+Their index in the argument list is used as the numerical value.
 If no values are specified, the values found in the provided
 data are sorted in lexically ascending order.
 
@@ -531,7 +531,14 @@ Converts lists of values into multiple binary columns.
 | fever, cough, headache |   | 1              | 1              | 1                 |
 | headache, cough        |   | 1              | 0              | 1                 |
 
-The default separator for `list` is a comma.<br>
+The default delimiter is a comma.<br>
+You can specify a custom delimiter via the `delimiter` argument:
+
+```python
+"Symptoms": List(delimiter=";")
+"Symptoms": List(delimiter=[",", ";"])  # also accepts lists
+```
+
 The passed strings are interpreted as regular expressions.
 
 ### ListAndOr
@@ -545,7 +552,7 @@ The passed strings are interpreted as regular expressions.
 | fever, cough and headache |   | 1              | 1              | 1                 |
 | headache or cough         |   | 1              | 0              | 1                 |
 
-The default separators for `list_and_or` are comma, "and" and "or".<br>
+The default delimiters are comma, "and" and "or".<br>
 The passed strings are interpreted as regular expressions.
 
 ### Map
@@ -598,7 +605,7 @@ Parallel(converter1, converter2, ...)
 
 Apply different converters to the respective items.
 Usually used in a Pipeline after other converters that create outputs with multiple items (e.g. `Split()`).
-Also, you usually want to use `Flatten()` after this, as each individual converter will return a list of items,
+Also, you usually want to use `Flatten()` after this, as each individual converter will return a tuple of items,
 even if it only contains one item.
 Example:
 
@@ -655,7 +662,7 @@ Examples:
 
 ### Transpose
 
-Can transpose nested lists, given that the nested lists are of equal length.
+Can transpose nested tuples, given that the nested tuples are of equal length.
 
 For example, look at this elegant implementation of the [`List()`](#list) converter:
 
@@ -670,7 +677,7 @@ For example, look at this elegant implementation of the [`List()`](#list) conver
 ```
 
 `Transpose()` allows us to apply `max` to each column of the one-hot encodings
-across all list elements.
+across all tuple elements.
 
 ### Function
 
@@ -684,29 +691,29 @@ Creates a custom converter from a custom ``transform()`` function
 (and optionally, a custom ``labels()`` function).
 This is a handy way to create a converter that doesn't need ``fit()``.
 
-Unlike ``StrictFunction()``, this class can handle functions that don't accept or return lists,
+Unlike ``StrictFunction()``, this class can handle functions that don't accept or return tuples,
 which often allows for more concise code.
 
 This is achieved during ``fit()`` as follows:
 
-1. If all incoming items are 1-element lists, it sets a flag ``UNPACK_OUTPUT`` to always
+1. If all incoming items are 1-element tuples, it sets a flag ``UNPACK_OUTPUT`` to always
    unpack the element before passing them to the wrapped function during ``transform()``.
-2. If during ``fit()`` the wrapped function doesn't return lists,
-   it tries to turn that output into a list:
+2. If during ``fit()`` the wrapped function doesn't return tuples,
+   it tries to turn that output into a tuple:
     - If the output is always a non-string iterable, it will simply set a
-      flag ``CONVERT_ITERABLE`` to always convert the iterable output into a list during ``transform()``.
+      flag ``CONVERT_ITERABLE`` to always convert the iterable output into a tuple during ``transform()``.
     - Otherwise, it sets a flag ``WRAP_OUTPUT`` to always wrap the output in a
-      1-element list during ``transform()``.
+      1-element tuple during ``transform()``.
 
 A similar logic is applied to the labels.
 If a custom labels function is given, the following procedure is followed during ``labels()``:
 
-1. If the incoming labels are a 1-element list, the single label is unpacked before
+1. If the incoming labels are a 1-element tuples, the single label is unpacked before
    it is passed to the custom labels function.
-2. If the custom labels function returns something other than a list,
-   this class tries to convert it into a list:
-    - If the output is a non-string iterable, it is converted into a list.
-    - Otherwise, the output is wrapped in a 1-element list.
+2. If the custom labels function returns something other than a tuple,
+   this class tries to convert it into a tuple:
+    - If the output is a non-string iterable, it is converted into a tuple.
+    - Otherwise, the output is wrapped in a 1-element tuple.
 
 If no custom labels function is given, the output labels are generated based on the
 output cardinality inferred during ``fit()`` and according to the following logic:
@@ -744,14 +751,14 @@ The following example turns a text column into two columns containing the ascii 
 lowercase before further processing.)
 
 As you can see, the number of columns is inferred directly from the return value of the conversion function.
-If the function returns a list, the resulting column names are indexed.
+If the function returns a tuple, the resulting column names are indexed.
 
 You can also set the labels explicitly with a lambda function
 that takes the input column name as an argument and returns output column names:
 
 ```python
-"Name": Function(lambda x: [ord(x[0]), ord(x[-1])],
-                 labels=lambda s: [f"ord(first letter of {s})", f"ord(last letter of {s})"]),
+"Name": Function(lambda x: (ord(x[0]), ord(x[-1])),
+                 labels=lambda s: (f"ord(first letter of {s})", f"ord(last letter of {s})")),
 ```
 
 | Name  | ⇒ | ord(first letter of Name) | ord(last letter of Name) |
@@ -763,7 +770,7 @@ However, remember that you can always simply use [`Label()`](#label) to rename t
 if you don't need the output column names to depend on the input column names.
 
 ```python
-"Name": [lambda x: [ord(x[0]), ord(x[-1])],
+"Name": [lambda x: (ord(x[0]), ord(x[-1])),
          Labels("ord(first letter)", "ord(last letter)")],
 ```
 
@@ -774,7 +781,7 @@ StrictFunction(transform, labels=None)
 ```
 
 Works mostly like [`Function()`](#function), but simpler:
-``transform`` and ``labels`` must both accept and return lists.
+``transform`` and ``labels`` must both accept and return tuples.
 Instead of something like this:
 
 ```python
@@ -784,13 +791,13 @@ Instead of something like this:
 you have to write this:
 
 ```python
-"Name": StrictFunction(lambda x: [str.lower(x[0])])
+"Name": StrictFunction(lambda x: (str.lower(x[0]),))  # notice the comma, which makes it a 1-element tuple
 ```
 
-That is, you will still receive 1-element lists as lists to the function,
-even if all input elements during `fit()` are 1-element lists.
-Also, you must now explicitly return a list,
-even if it is just a 1-element list, as otherwise an error will be raised.
+That is, you will still receive 1-element tuples as tuples to the function,
+even if all input elements during `fit()` are 1-element tuples.
+Also, you must now explicitly return a tuple,
+even if it is just a 1-element tuple, as otherwise an error will be raised.
 
 See [`Function()`](#function) for a convenient extension of this converter.
 
@@ -803,13 +810,13 @@ A converter returns two things:
 - `transform()`: the items of the transformed data
 - `labels()`: a label for each item
 
-Both return values are lists.
+Both return values are tuples.
 
 For top-level converters, this then creates the corresponding amount of columns.
 This includes the case of
 
-- a 1-element list `[item]`, which is the case for most converters.
-- an empty list `[]`, in which the result is ignored.
+- a 1-element tuple `(item,)`, which is the case for most converters.
+- an empty tuple `()`, in which the result is ignored.
   (In fact, this is exactly how `Ignore()` is implemented.)
 
 This means, however, that for top-level converters, `labels()` and `transform()`

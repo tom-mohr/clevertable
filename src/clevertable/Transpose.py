@@ -1,28 +1,28 @@
 from __future__ import annotations
 
 from .Converter import Converter
-from ._utils import _flatten
+from ._utils import _flatten_tuples
 
 
 class Transpose(Converter):
 
-    def transform(self, row: list) -> list[list]:
-        # assume that row is a list of lists
-        # and that the nested lists are of equal length
-        return [list(item) for item in zip(*row)]
+    def transform(self, row: tuple[tuple]) -> tuple[tuple]:
+        # assume that row is a tuple of tuples
+        # and that the nested tuples are of equal length
+        return tuple(tuple(item) for item in zip(*row))
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         """
-        Expects a list of lists.
-        The nested lists must all be identical to each other.
+        Expects a tuple of tuples.
+        The inner tuples must all be identical to each other.
 
-        :param labels: A list of lists of labels.
-        :return: The first list.
+        :param labels: A tuple of tuples of labels.
+        :return: The first tuple.
         """
         assert len(labels) > 0
         first_labels = labels[0]
-        assert isinstance(first_labels, list), \
-            f"Labels passed to Transpose() must be lists," \
+        assert isinstance(first_labels, tuple), \
+            f"Labels passed to Transpose() must be tuples," \
             f" but received {repr(first_labels)} of type {type(first_labels)}."
         if len(labels) > 1:
             # ensure that all labels are identical

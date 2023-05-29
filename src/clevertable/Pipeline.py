@@ -12,7 +12,7 @@ class _Pipeline(Converter):
         self.first = _parse_converter(first)
         self.second = _parse_converter(second)
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
         self.first.fit(rows)
         self.second.fit([self.first.transform(row) for row in rows])
 
@@ -26,10 +26,10 @@ class _Pipeline(Converter):
                 f"Infer() converter for did not infer a converter during fit()"
             self.second = self.second.inferred
 
-    def labels(self, labels: list) -> list:
+    def labels(self, labels: tuple) -> tuple:
         return self.second.labels(self.first.labels(labels))
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         return self.second.transform(self.first.transform(row))
 
     def __repr__(self):

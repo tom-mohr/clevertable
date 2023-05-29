@@ -6,5 +6,5 @@ from .Converter import Converter
 class Id(Converter):
     """Returns the input value unchanged."""
 
-    def transform(self, row: list) -> list:
+    def transform(self, row: tuple) -> tuple:
         return row

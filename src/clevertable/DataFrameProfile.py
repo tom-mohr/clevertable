@@ -40,7 +40,7 @@ class DataFrameProfile:
         """
         dicts = df.to_dict(orient="records")
         dicts = [self.__pre_process_dict(d) for d in dicts]  # pre-process each dict
-        rows = [[d] for d in dicts]  # wrap each dict in a 1-element list
+        rows = [(d,) for d in dicts]  # wrap each dict in a 1-element tuple
 
         self._record_profile.fit(rows)
 
@@ -61,7 +61,7 @@ class DataFrameProfile:
 
     def transform_single(self, row: dict[str, any]) -> dict[str, any]:
         row = self.__pre_process_dict(row)
-        return self._record_profile.transform([row])[0]  # wrap, transform, and unpack again
+        return self._record_profile.transform((row,))[0]  # wrap, transform, and unpack again
 
     def fit_transform(self, df: pd.DataFrame) -> pd.DataFrame:
         self.fit(df)
@@ -77,10 +77,10 @@ class DataFrameProfile:
         return self
 
     @property
-    def column_names(self) -> dict[any, list]:
+    def column_names(self) -> dict[any, tuple]:
         """
         A dictionary that maps input column names to output column names.
-        Note that the output column names are lists, even if there is only a single
+        Note that the output column names are tuples, even if there is only a single
         output column for the respective input column.
         """
         return self._record_profile.keys

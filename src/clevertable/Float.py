@@ -64,7 +64,7 @@ class Float(Converter):
     def default(self):
         return self.__default_value
 
-    def fit(self, rows: list[list]):
+    def fit(self, rows: list[tuple]):
 
         values = [row[0] for row in rows]  # unpack 1-element rows
 
@@ -91,11 +91,11 @@ class Float(Converter):
                 mode_, count = mode(parsed_values, keepdims=False)
                 self.__default_value = float(mode_)
 
-    def transform(self, row: list) -> list:
-        val = row[0]  # unpack 1-element list
-        number = _try_float(val)
-        if number is not None:
-            return [number]
+    def transform(self, row: tuple) -> tuple:
+        val = row[0]  # unpack 1-element tuple
+        num = _try_float(val)
+        if num is not None:
+            return (num,)
 
         # conversion / parsing failed.
         # ensure that a usable default value exists
@@ -105,7 +105,7 @@ class Float(Converter):
         if self.__default_value in ("mean", "median", "mode"):
             raise ValueError(f"You must call fit() before transform().")
 
-        return [self.__default_value]
+        return (self.__default_value,)
 
     def __repr__(self):
         if self.__default_value is None:
