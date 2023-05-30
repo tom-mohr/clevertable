@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import numbers
 import re
 
 from .Converter import Converter
@@ -47,7 +46,6 @@ def _infer_converter_from_data(rows: list[tuple]) -> Converter:
     from .Binary import Binary
     from .Enumerate import Enumerate
     from .Float import Float
-    from .Float import _try_float
     from .List import List, ListAndOr
     from .OneHot import OneHot
 
@@ -56,9 +54,14 @@ def _infer_converter_from_data(rows: list[tuple]) -> Converter:
 
         values = [row[0] for row in rows]  # unpack 1-element rows
 
-        # if only contains numbers:
-        if all(isinstance(val, numbers.Number) or val in (None, "") or _try_float(val) is not None
-               for val in values):
+        def _is_parseable_float(val: any) -> bool:
+            try:
+                float(val)
+            except (ValueError, TypeError, OverflowError):
+                return False
+            return True
+
+        if all(map(_is_parseable_float, values)):
             return Float()
 
         # since numerical approach failed,

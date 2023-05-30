@@ -1,44 +1,12 @@
 from __future__ import annotations
 
+import math
 from typing import Literal
 
-from numpy import mean, median, isinf, isnan, isfinite, number
+from numpy import mean, median, isfinite
 from scipy.stats import mode
 
 from .Converter import Converter
-
-
-def _try_float(val: any) -> float | None:
-    try:
-        x = float(val)
-    except (TypeError, ValueError, OverflowError):
-        return None
-
-    # x is a float, but is it a "good" float?
-    if isinf(x):
-        return None
-    if isnan(x):
-        return None
-
-    # all checks passed
-    return x
-
-
-def _is_number(val: any):
-    try:
-        _check_number(val)
-        return True
-    except ValueError:
-        return False
-
-
-def _check_number(val: any) -> any:
-    """Returns the given value if it is a number, otherwise raises a ValueError."""
-    if not isinstance(val, (int, float, number)):
-        raise ValueError(f"Value '{val}' is not a number")
-    if not isfinite(val):
-        raise ValueError(f"Value '{val}' is not a finite number")
-    return val
 
 
 class Float(Converter):
@@ -52,12 +20,6 @@ class Float(Converter):
         - If an infinite number is encountered, it is replaced with the given default value.
         - If any other value is encountered, it is replaced with the given default value.
         """
-        if default is not None:
-            # check type of default value
-            if default not in ("mean", "median", "mode"):
-                if not _is_number(default):
-                    raise ValueError(f"Invalid default value '{default}'.")
-
         self.__default_value = default
 
     @property
@@ -72,29 +34,43 @@ class Float(Converter):
             # replace default value with the corresponding number
 
             # collect all numbers that can be parsed
-            parsed_values = []
+            usable_numbers = []
             for val in values:
                 try:
-                    number = float(val)
-                except:
+                    val = float(val)
+                except (ValueError, TypeError):
                     continue
-                parsed_values.append(number)
+                except OverflowError:
+                    # todo: issue warning
+                    continue
 
-            if len(parsed_values) == 0:
+                if not isfinite(val):
+                    continue
+
+                usable_numbers.append(val)
+
+            if len(usable_numbers) == 0:
                 raise ValueError(f"Cannot compute {self.__default_value},"
-                                 f" because parsing failed for all numbers.")
+                                 f" because no usable numbers were found in the given data.")
             if self.__default_value == "mean":
-                self.__default_value = float(mean(parsed_values))
+                self.__default_value = float(mean(usable_numbers))
             elif self.__default_value == "median":
-                self.__default_value = float(median(parsed_values))
+                self.__default_value = float(median(usable_numbers))
             elif self.__default_value == "mode":
-                mode_, count = mode(parsed_values, keepdims=False)
+                mode_, count = mode(usable_numbers, keepdims=False)
                 self.__default_value = float(mode_)
 
     def transform(self, row: tuple) -> tuple:
         val = row[0]  # unpack 1-element tuple
-        num = _try_float(val)
-        if num is not None:
+        try:
+            num = float(val)
+        except (ValueError, TypeError):
+            num = float("nan")
+        except OverflowError:
+            # todo: issue warning
+            num = float("nan")
+
+        if math.isfinite(num):
             return (num,)
 
         # conversion / parsing failed.
