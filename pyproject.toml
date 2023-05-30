@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "clevertable"
-version = "3.0.0"
+version = "3.0.1"
 description = "Low effort conversion of tabular data into numerical values."
 readme = "README.md"
 authors = [{ name = "Tom Mohr" }]
@@ -32,7 +32,7 @@ Homepage = "https://github.com/tom-mohr/clevertable"
 clevertable = "clevertable.__main__:main"
 
 [tool.bumpver]
-current_version = "3.0.0"
+current_version = "3.0.1"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
