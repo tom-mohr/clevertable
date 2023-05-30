@@ -334,7 +334,7 @@ Here's a quick overview of all converters:
 | [`Infer()`](#infer)                   |                                                                                     |           |                                                                 |
 | [`Label()`](#label)                   |                                                                                     |           |                                                                 |
 | Dimensionality:                       |                                                                                     |           |                                                                 |
-| [`Flatten()`](#flatten)               | Flatten a list of lists into a single list. This is often needed after `ForEach()`. |           |                                                                 |
+| [`Flatten()`](#flatten)               | Flatten a tuple of tuples into a single tuple. This is often needed after `ForEach()`. |           |                                                                 |
 | [`Transpose()`](#transpose)           |                                                                                     |           |                                                                 |
 | Arbitrary Functions:                  |                                                                                     |           |                                                                 |
 | [`Function()`](#function)             | Apply a user-defined function to the data.                                          | callable  | lambda x: x**2                                                  |
