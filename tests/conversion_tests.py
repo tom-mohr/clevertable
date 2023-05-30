@@ -175,11 +175,19 @@ def test_pipeline():
 def test_numbers():
     profile = ConversionProfile({
         "age": Float(default="mean"),
+        "mode_test": Float(default="mode"),
         "numbers_with_nan": Float(default=-1),
     })
     df_src = pd.DataFrame({
         "age": [
             "retired",
+            "12.5",
+            39,
+            "40",
+            40,
+        ],
+        "mode_test": [
+            np.nan,
             "12.5",
             39,
             "40",
@@ -197,6 +205,7 @@ def test_numbers():
     df = profile.transform(df_src)
 
     assert profile["age"].default == 32.875
+    assert profile["mode_test"].default == 40
     assert df["age"].tolist() == [32.875, 12.5, 39.0, 40.0, 40.0]
     assert df["numbers_with_nan"].tolist() == [-1.0, 12.5, 39.0, 40.0, 40.0]
 

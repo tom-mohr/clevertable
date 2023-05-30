@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 import math
-from typing import Literal
+from collections import Counter
+from typing import Literal, Iterable
 
-from numpy import mean, median, isfinite
-from scipy.stats import mode
+from numpy import mean, median
+from math import isfinite
 
 from .Converter import Converter
+
+
+def _mode(a: Iterable[float]) -> float:
+    counter = Counter(a)
+    mode, freq = counter.most_common(1)[0]
+    return mode
 
 
 class Float(Converter):
@@ -57,8 +64,7 @@ class Float(Converter):
             elif self.__default_value == "median":
                 self.__default_value = float(median(usable_numbers))
             elif self.__default_value == "mode":
-                mode_, count = mode(usable_numbers, keepdims=False)
-                self.__default_value = float(mode_)
+                self.__default_value = _mode(usable_numbers)
 
     def transform(self, row: tuple) -> tuple:
         val = row[0]  # unpack 1-element tuple

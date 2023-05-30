@@ -19,7 +19,6 @@ dependencies = [
     "numpy",
     "pandas",
     "openpyxl",  # needed for xlsx support
-    "scipy",
 ]
 requires-python = ">=3.9"
 
