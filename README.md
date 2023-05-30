@@ -81,7 +81,7 @@ Here are some examples on what you can do with CleverTable:
   ```
 - Send nested columns into one converter:
   ```python
-  profile[("Column 1", "Column 2"), "Column 3"] = Parallel(max, min)
+  profile[("Column A", "Column B"), "Column C"] = [Parallel(max, floor), min]  # min(max(A, B), floor(C))
   ```
 
 # Tutorial
@@ -334,7 +334,7 @@ Here's a quick overview of all converters:
 | [`Infer()`](#infer)                   |                                                                                     |           |                                                                 |
 | [`Label()`](#label)                   |                                                                                     |           |                                                                 |
 | Dimensionality:                       |                                                                                     |           |                                                                 |
-| [`Flatten()`](#flatten)               | Flatten a tuple of tuples into a single tuple. This is often needed after `ForEach()`. |           |                                                                 |
+| [`Flatten()`](#flatten)               | Flatten a tuple of tuples into a single tuple. This is often needed after `ForEach()` or `Parallel()`. |           |                                                                 |
 | [`Transpose()`](#transpose)           |                                                                                     |           |                                                                 |
 | Arbitrary Functions:                  |                                                                                     |           |                                                                 |
 | [`Function()`](#function)             | Apply a user-defined function to the data.                                          | callable  | lambda x: x**2                                                  |
