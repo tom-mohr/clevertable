@@ -1,4 +1,5 @@
 # CleverTable
+![Pytest](https://github.com/tom-mohr/clevertable/actions/workflows/pytest.yml/badge.svg)
 
 Consistent, intelligent transformation of text-based tabular data into numerical data.<br>
 Minimal configuration required.
