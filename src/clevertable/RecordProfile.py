@@ -106,7 +106,7 @@ class RecordProfile(Converter):
                     if key in d
                 ]
             if not rows:
-                raise ValueError(f"Not a single value for key {repr(key)} present int fit()!"
+                raise ValueError(f"Not a single value for key {repr(key)} present during fit()!"
                                  f" You must at least provide one value to fit() for this key.")
                 pass
 
