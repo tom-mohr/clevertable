@@ -23,7 +23,7 @@ dependencies = [
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
-dev = ["bumpver", "twine", "pytest"]
+dev = ["bumpver", "build", "twine", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/tom-mohr/clevertable"
