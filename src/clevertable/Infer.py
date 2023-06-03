@@ -29,6 +29,7 @@ class Infer(Converter):
         except ValueError as e:
             if self.ignore_uninferrable:
                 self.inferred = Ignore()
+                return
             raise e
         self.inferred.fit(rows)
 
