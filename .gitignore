@@ -1,3 +1,4 @@
 .idea
 dist
 src/clevertable.egg-info
+**/__pycache__/
