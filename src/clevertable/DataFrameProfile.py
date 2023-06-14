@@ -102,5 +102,11 @@ class DataFrameProfile:
     def __setitem__(self, key, value):
         self._record_profile[key] = value
 
+    def __delitem__(self, key):
+        del self._record_profile[key]
+    
+    def __contains__(self, item):
+        return item in self._record_profile
+
     def __repr__(self):
         return repr(self._record_profile)

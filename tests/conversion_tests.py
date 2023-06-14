@@ -341,3 +341,11 @@ def test_record_multi_column():
 
     assert df["A"].tolist() == [1, 2, 3, 4]
     assert df["B"].tolist() == [13, 14, 3, 4]
+
+
+def test_profile_del():
+    profile = ConversionProfile()
+    profile["Test"] = Float()
+    del profile["Test"]
+    assert "Test" not in profile
+

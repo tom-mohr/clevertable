@@ -199,6 +199,12 @@ class RecordProfile(Converter):
     def __setitem__(self, key, value):
         self._profile[key] = _parse_converter(value)
 
+    def __delitem__(self, key):
+        del self._profile[key]
+
+    def __contains__(self, item):
+        return item in self._profile
+
     def __repr__(self):
         s = "{\n"
         for key, conv in self._profile.items():
